@@ -123,6 +123,17 @@ ExampleDbContext context = new();
 //Person? person=await context.Persons.FindAsync(1);
 //Console.WriteLine();
 #endregion
+#region AddBookOfRowVersion
+//Book book = new()
+//{
+//    BookName="kitap adı",
+//    Authors=new HashSet<Author>() { new() { AuthorName="Yazar Adı"} }
+//};
+//context.Books.Add(book);
+//context.SaveChanges();
+#endregion
+
+
 class Person
 {
     public int Id { get; set; }
@@ -144,6 +155,7 @@ class Adress
 class Book
 {
     public int Id { get; set; }
+    public Byte[] rowVersion { get; set; }
     public string BookName { get; set; }
 
     public ICollection<Author> Authors { get; set; }
@@ -190,4 +202,25 @@ class ExampleDbContext : DbContext
 
     //}
     #endregion
+    #region Fluent Api Yapılanması 2
+    //protected override void OnModelCreating(ModelBuilder modelBuilder)
+    //{
+    //    modelBuilder.Entity<Person>(p =>
+    //    {
+    //        p.ToTable("Persons").HasKey(p => p.Id); -->HasNoKey özelliği de key'in olmaması için kullanılır.s
+    //        p.Property(p => p.FirstName).HasColumnName("FirstName");
+    //        p.HasOne(p => p.Adresses);
+    //    });
+    //}
+    #endregion
+    #region RowVersion FluentApi yapılanması ile
+    //IsRowVersion ile kolon versiyonunu belirtiyoruz.
+    //protected override void OnModelCreating(ModelBuilder modelBuilder)
+    //{
+    //    modelBuilder.Entity<Book>()
+    //        .Property(x => x.rowVersion)
+    //        .IsRowVersion();
+    //}
+    #endregion
+
 }
