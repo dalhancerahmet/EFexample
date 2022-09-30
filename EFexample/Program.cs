@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection;
+
 ExampleDbContext context = new();
 #region one to one add
 
@@ -297,5 +300,44 @@ class ExampleDbContext : DbContext
         //    .HasQueryFilter(p => p.Active == true);
         // Burada HasQueryFilter ile Person entitisindeki Active propersinin true olanlarının gelmesini sağlıyoruz.
         #endregion
+        #region GeneratedValue
+
+        #endregion
+        #region IEntityTypeConfigurationOnModelCreating
+        /* modelBuilder.ApplyConfiguration(new PersonConfiguration());*/ // Farklı sınıflarda yaptığımız configuration işlemlerini burada tanımlayarak aktif hale getiriyoruz.
+        #endregion
+        #region ApplyConfigurationsFromAssembly
+        /*modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());*/ // Bunu yaptığımızda harici sınıflardaki tüm configuration'ları tek tek onModelCreating içerisinde tanımlamak yerine bunu yazdığımızda EF Core gidip tüm assembly'leri bulup ekliyor. Bir üstteki IEntityTypeConfigurationOnModelCreating başlığındaki işlemi her nesne için yapmamıza gerek kalmıyor.
+        #endregion
+        #region Seed Data
+        // Migration sürecinde manuel olarak veri oluşturmamızı sağlar. Bunlar şu gibi durumlar için kullanılabilir:
+        //1- Static rolleri migration sürecinde direkt oluşturmak. 2- Test amaçlı veriler eklemek.3- Örneğin  konnektör için varsayılan bir kullanıcı oluşturma Kullanımı: 
+
+        //modelBuilder.Entity<Product>()
+        //    .HasData(
+        //    new Product() { Id=1,Name="Telefon",Price=1000,Salary=500},
+        //    new() { Id = 2, Name = "Pc", Price = 5000, Salary = 100 }
+        //    );
+
+        // Önemli not!!--> Seed Datalarda primary key değerli manuel olarak tarafımızca verilmelidir.
+        #endregion
     }
+    #region IEntityTypeConfiguration<T>
+    // Bu interface ile implemente edilen sınıfta OnModelCreating işlemlerini yapabiliyoruz. Bu bizim configuration işlemlerini farklı bir sınıfta yaparak düzenli ve profesyonel çalışmamızı sağlıyor.
+
+    //Önemli Not!!! --> Farklı sınıf üzerinden yaptığımız configuration'ı kullanıma açmak/uygulamak için OnModelCreating fonksiyonuna özellikle belirtmemiz gerekmektedir. Nasıl belirttiğimizi kendi başlığı altında görebiliriz. Bakınız yukarıdaki IEntityTypeConfigurationOnModelCreating
+
+    //class PersonConfiguration : IEntityTypeConfiguration<Person>
+    //{
+    //    public void Configure(EntityTypeBuilder<Person> builder)
+    //    {
+    //        builder.HasKey(p => p.Id);
+    //        builder.Property(p => p.CreatedDate)
+    //            .HasDefaultValue(DateTime.UtcNow);
+    //        builder.Property(p => p.Active)
+    //            .HasColumnName("Activeted");
+    //        //... bu şekilde devam eder.
+    //    }
+    //}
+    #endregion
 }
