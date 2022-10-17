@@ -171,7 +171,7 @@ class Book
 {
     public int Id { get; set; }
     public int IdBook { get; set; }
-    public Byte[] rowVersion { get; set; }
+    //public Byte[] rowVersion { get; set; }
     public string BookName { get; set; }
 
     public ICollection<Author> Authors { get; set; }
@@ -191,19 +191,49 @@ class Product
     public int Salary { get; set; }
     public int ComputedValue { get; set; }
 }
+//---------------------------------
+//TableForHierarchy için aşağıdaki kalıtımsal tablolar oluşturulmuştur.
+class Personel
+{
+    public int Id { get; set; }
+    public string? Name { get; set; }
+    public string? Surname { get; set; }
+}
+class Employee : Personel
+{
+    public string? Department { get; set; }
+}
+class Customer : Personel
+{
+    public string? CompanyName { get; set; }
+}
+class Technician : Employee
+{
+    public string? Branch { get; set; }
+}
+//TableForHierarchy sınıfları bitişi.
 class ExampleDbContext : DbContext
 {
-
     public DbSet<Person> Persons { get; set; }
     public DbSet<Adress> Adresses { get; set; }
     public DbSet<Book> Books { get; set; }
     public DbSet<Author> Authors { get; set; }
     public DbSet<Product> Products { get; set; }
 
+    //TableForHierarchy dbsetlerin tanımlanması.
+    public DbSet<Personel>? Personels { get; set; }
+    public DbSet<Employee>? Employees { get; set; }
+    public DbSet<Customer>? Customers { get; set; }
+    public DbSet<Technician>? Technicians { get; set; }
+    //TableForHierarchy dbsetlerin tanımlanması bitiş.
+
+    #region ConConfiguringSqlServerConnection
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer("Server=AHMET\\SQLEXPRESS;Database=EfExampleDb;Trusted_Connection=True;");
     }
+    #endregion
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         #region OnModelCreating
@@ -320,6 +350,9 @@ class ExampleDbContext : DbContext
         //    );
 
         // Önemli not!!--> Seed Datalarda primary key değerli manuel olarak tarafımızca verilmelidir.
+        #endregion
+        #region TableForHierarchy 
+        // Hiyerarşili tabloları oluştururken farklı tablolar halinde değil de tek tablo altında oluşturmak istiyorsak bu yaklaşımı kullanabiliriz. Yukarıda person ile başlayan nesneler oluşturup alt nesnelere kalıtım vererek bu şekilde hiyerarşi oluşturmuş olduk. EntitFramework bu yapıyı algılayıp ona göre veritabanında tek tablo şeklinde oluşturacaktır.
         #endregion
     }
     #region IEntityTypeConfiguration<T>
