@@ -353,6 +353,8 @@ class ExampleDbContext : DbContext
         #endregion
         #region TableForHierarchy 
         // Hiyerarşili tabloları oluştururken farklı tablolar halinde değil de tek tablo altında oluşturmak istiyorsak bu yaklaşımı kullanabiliriz. Yukarıda person ile başlayan nesneler oluşturup alt nesnelere kalıtım vererek bu şekilde hiyerarşi oluşturmuş olduk. EntitFramework bu yapıyı algılayıp ona göre veritabanında tek tablo şeklinde oluşturacaktır.
+
+        //1. Yapılması gereken kalıtım alacak sınıfları oluşturma. 2. olarak dbsetlerini ayrı ayrı belirlemek.Gerisini ef core yapacaktır.
         #endregion
     }
     #region IEntityTypeConfiguration<T>
