@@ -174,6 +174,13 @@ await context.SaveChangesAsync();
  * Bu durumun oluşması için modelbuilder ile toTable yapılarak tablo adları verilmelir.
  **/
 #endregion
+#region Table Per Concrete
+/**
+ * Ef core 7 ile gelecek olan özelliktir. Bu davranışta abstract sınıf yani kalıtımı alınan sınıf için tablo oluşturulmaz.
+ * Kalıtım alan sınıflar için ayrı ayır tablolar oluşturulur.
+ * Oluşturulan tablolar arasında ilişki kurulmamaktadır.
+  **/
+#endregion
 
 class Person
 {
