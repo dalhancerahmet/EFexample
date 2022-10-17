@@ -142,7 +142,38 @@ ExampleDbContext context = new();
 #region HasConstrainName
 // Constrain oluşturulurken manuel bunlara isim vermemizi sağlıyor. Örneği iki ilişkili tabloda HasForeignKey leri veritabanında constrain olarak manuel isim verebiliyoruz.
 #endregion
+#region TablePerHierarchy ile veri ekleme davranışları
+//Employee employee = new() { Name = "Ahmet", Surname = "Dalhançer", Department = "Yazılım" };
+//Personel personel = new() { Name = "Personel1", Surname = "PersonelSoyadi1", };
+//await context.AddRangeAsync(employee,personel);
+context.SaveChanges();
+#endregion
+#region TablePerHierarchy ile veri silme davranışları
+//Personel silinecekPersonel=await context.Personels.FindAsync(3);
+//context.Remove(silinecekPersonel);
 
+//Discriminatör kolonunda belli sınıfta üretilenleri silmek istersek
+//var silinecekVeriler = context.Employees.ToList();
+//context.RemoveRange(silinecekVeriler);
+//context.SaveChanges();
+#endregion
+#region TablePerHierarchy ile veri güncelleme davranışları
+//var guncellenecekVeri = await context.Employees.FindAsync(4);
+//guncellenecekVeri.Name = "Mehmet";
+
+//Employee guncellenecekVeri2 = new() { Id = 4, Name = "AhmetComeBack" };
+//context.Personels.Update(guncellenecekVeri2);
+await context.SaveChangesAsync();
+#endregion
+#region TablePerHierarchy ile veri sorgulama davranışları
+//var result = context.Employees.ToList();
+//Console.WriteLine();
+#endregion
+#region Table Per Type
+/** Bu davranışta kalıtım alan tablolarda tek tablo şeklinde değil de her sınıf için farklı tablolar oluşturulur.
+ * Bu durumun oluşması için modelbuilder ile toTable yapılarak tablo adları verilmelir.
+ **/
+#endregion
 
 class Person
 {
@@ -191,8 +222,7 @@ class Product
     public int Salary { get; set; }
     public int ComputedValue { get; set; }
 }
-//---------------------------------
-//TableForHierarchy için aşağıdaki kalıtımsal tablolar oluşturulmuştur.
+//TablePerHierarchy sınıfları başlangıcı.
 class Personel
 {
     public int Id { get; set; }
@@ -211,7 +241,7 @@ class Technician : Employee
 {
     public string? Branch { get; set; }
 }
-//TableForHierarchy sınıfları bitişi.
+//TablePerHierarchy sınıfları bitişi.
 class ExampleDbContext : DbContext
 {
     public DbSet<Person> Persons { get; set; }
@@ -356,6 +386,18 @@ class ExampleDbContext : DbContext
 
         //1. Yapılması gereken kalıtım alacak sınıfları oluşturma. 2. olarak dbsetlerini ayrı ayrı belirlemek.Gerisini ef core yapacaktır.
         #endregion
+        #region TableForHierarchy Discriminatör kolonunu özelleştirme
+        #region Discriminatör adını özelleştirme
+        // Base sınıfta bulunur. Bunun için modelbuilder yapılırken Personel tablosu seçilir. Örn:
+        /*modelBuilder.Entity<Personel>().HasDiscriminator<string>("Ayirici");*/ // Bu şekilde discriminator'e istediğimiz isimlendirmeyi verebiliyoruz.
+        #endregion
+        #region Discriminatör Değerlerini değiştirme
+
+
+        #endregion
+
+        #endregion
+
     }
     #region IEntityTypeConfiguration<T>
     // Bu interface ile implemente edilen sınıfta OnModelCreating işlemlerini yapabiliyoruz. Bu bizim configuration işlemlerini farklı bir sınıfta yaparak düzenli ve profesyonel çalışmamızı sağlıyor.
