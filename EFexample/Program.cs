@@ -181,6 +181,19 @@ await context.SaveChangesAsync();
  * Oluşturulan tablolar arasında ilişki kurulmamaktadır.
   **/
 #endregion
+#region Include
+//Üretilen sorguda diğer ilişkisel tabloları dahil etmek istiyorsak include fonksiyonunu kullanırız.
+var result= await context.Persons.Include(p => p.Adresses).ToListAsync(); // Burada Persons tablosunun ilişkili olduğu Adresses tablosunu dahil etmiş olduk.
+/*
+SELECT[p].[Id], [p].[Active], [p].[CreatedDate], [p].[FirstName], [p].[Id2], [p].[LastName], [a].[Id], [a].[PersonAdress], [a].[PersonId]
+FROM[Persons] AS[p]
+LEFT JOIN[Adresses] AS [a] ON[p].[Id] = [a].[PersonId]
+ORDER BY[p].[Id] 
+Sql profile ile gönderdiğimiz sorgunun çıktısını görüyoruz.
+ */
+
+Console.WriteLine();
+#endregion
 
 class Person
 {
