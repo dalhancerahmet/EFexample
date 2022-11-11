@@ -183,7 +183,7 @@ await context.SaveChangesAsync();
 #endregion
 #region Include
 //Üretilen sorguda diğer ilişkisel tabloları dahil etmek istiyorsak include fonksiyonunu kullanırız.
-var result= await context.Persons.Include(p => p.Adresses).ToListAsync(); // Burada Persons tablosunun ilişkili olduğu Adresses tablosunu dahil etmiş olduk.
+var result = await context.Persons.Include(p => p.Adresses).ToListAsync(); // Burada Persons tablosunun ilişkili olduğu Adresses tablosunu dahil etmiş olduk.
 /*
 SELECT[p].[Id], [p].[Active], [p].[CreatedDate], [p].[FirstName], [p].[Id2], [p].[LastName], [a].[Id], [a].[PersonAdress], [a].[PersonId]
 FROM[Persons] AS[p]
@@ -193,6 +193,107 @@ Sql profile ile gönderdiğimiz sorgunun çıktısını görüyoruz.
  */
 
 Console.WriteLine();
+#endregion
+#region Join
+
+#region QuerySyntax
+//var query = from person in context.Persons
+//            join adress in context.Adresses
+//            on person.Id equals adress.Id
+//            select new
+//            {
+//                person.Id,
+//                person.FullName,
+//                adress.PersonAdress
+//            };
+//var datas=await query.ToListAsync();
+
+
+/* Sql profile çıktısı: 
+  SELECT [p].[Id], [p].[Active], [p].[CreatedDate], [p].[FirstName], [p].[Id2], [p].[LastName], [a].[PersonAdress]
+FROM [Persons] AS [p]
+INNER JOIN [Adresses] AS [a] ON [p].[Id] = [a].[Id]
+*/
+Console.WriteLine();
+#endregion
+
+#region MethodSyntax
+//var query = context.Products.Join(context.Persons, product => product.Id, person => person.Id, (product, person) => new
+//{
+//    product.Name,
+//    person.FirstName
+//});
+//var datas= await query.ToListAsync();
+
+
+#endregion
+#endregion
+#region MultipleColumns
+// 1 den fazla kolon ile  joinlenecek ise aşağıdaki syntax kullanılır. Bu sql sorgusu tarafında and işlemine karşılık gelir.
+#region QuerySyntax
+/*
+var query = from product in context.Products
+            join person in context.Persons //salary ile firstname eşitlenemediğinden dolayı hata veriyor. aşağıdaki bir örnek olsun diye yapıldı.
+            on new { product.Id, product.Salary } equals new { person.Id, Salary = person.FirstName }
+            select new
+            {
+                person.LastName,
+                product.Name
+            };
+await query.ToListAsync();*/
+#endregion
+#region MethodSyntax
+/*
+context.Products
+    .Join(context.Personels, product => new
+    {
+        product.Name
+    },
+    person => new
+    {
+        person.Name
+    },
+    (product, person) => new
+    {
+        person.Surname,
+        product.Salary,
+    });*/
+#endregion
+#endregion
+#region MutlipleTableJoin
+#region QuerySyntax
+/*
+var query = from product in context.Products
+            join person in context.Persons
+                on product.Id equals person.Id
+            join p in context.Personels
+                on product.Name equals p.Name
+            select new
+            {
+                product.Name,
+                person.CreatedDate,
+                p.Id
+            };
+var datas = await query.ToListAsync();*/
+#endregion
+#region MethodSyntax
+/*
+var query = context.Persons
+    .Join(context.Products,
+    person => person.Id,
+    product => product.Id,
+    (person, product) => new
+    {
+        person.Id,
+        person.LastName,
+        product.Name
+    })
+    .Join(context.Personels, personProducts => personProducts.Id, p => p.Surname, (personProducts,p) => new
+    {
+        p.Surname,
+        personProducts.LastName
+    });*/
+#endregion
 #endregion
 
 class Person
