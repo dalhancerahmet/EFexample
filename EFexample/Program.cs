@@ -295,6 +295,9 @@ var query = context.Persons
     });*/
 #endregion
 #endregion
+#region FromSql EF Core 7
+//DotNet 7 ile gelen bir özellik olduğu için bu projeye değil de kendi başlığı altında değerlendirdim.
+#endregion
 
 class Person
 {
