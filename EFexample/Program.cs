@@ -298,6 +298,61 @@ var query = context.Persons
 #region FromSql EF Core 7
 //DotNet 7 ile gelen bir özellik olduğu için bu projeye değil de kendi başlığı altında değerlendirdim.
 #endregion
+#region View
+#region View Nedir
+//Karmaşık sorguları tekrar tekrar yazmak yerine view oluşturularak her çağrıldığında karmaşık sorgunun çalışmasını sağlayan veritabanı aracıdır.
+/*
+ * Veritabanı üzerinde view şu şekilde oluşturulur: 
+ * Create View vm_Test
+ * as
+ * Select products.Name, Count(*) from products
+ * join orders on products.Id=orders.Id
+ * Group By products.Name, Count(*)
+ */
+//Başına Create view daha sonra view'e bir isim veriyor ve As takısı ile başlıyoruz.
+#endregion
+#region View Kod Tarafında Nasıl Oluşturulur.
+//1.Adım boş bir migration oluşturulur.
+//2.Adım Up metodu içerisine sorgu yazılır. Bknz: Migrations içerisindeki mig_View'e
+//3.Adım Down metodu içerisine ise migration'ı geri aldığımızda yapılmasını istediğimiz yani view'in silinmesi için gerekli sorguyu yazıyoruz.
+//End
+
+
+/* Migration Up Fonksiyonu içerisine aşağıdaki gibi kod yazılır.
+ 
+ migrationBuilder.Sql($@"
+                
+                Create view vm_ListBooks
+                As
+                Select * From Books
+            ");
+ 
+ */
+
+/* Migration Down Fonksiyonu içerisine aşağıdaki gibi kod yazılır.
+ migrationBuilder.Sql($@"Drop view vm_ListBooks");
+
+ */
+#endregion
+#region View Kod Tarafında  Nasıl Tanımlanır.
+/*
+ View'in çıktısında hangi kolonlar oluyorsa buna uygun olarak nesne oluşturulur. 
+ Bu nesne DbSet olarak tanımlanır.
+ Son olarak OnModelCreating override'ı içerisinde gerekli configuration'ları yapıyoruz.
+ */
+#endregion
+#region Kod Tarafında View Nasıl Kullanılır/Çalıştırılır.
+//var bookAuthors= await context.BookAuthors.ToListAsync();
+// Sorgulanan view'lere linq sorguları da ekstradan eklenebilmektedir. Örn: 
+// var bookAuthorsThenCount5=await context.BookAuthors.Where(bo=>bo.Count>5).ToListAsync();
+#endregion
+#region View Dikkat Edilmesi Gerekenler
+/*
+ 1- Viewlerde primary key olmaz bundan dolayı hasnokey ile işaretlenmelidir.
+ 2- View'ler change tracker tarafından takip edilmezler.
+ */
+#endregion
+#endregion
 
 class Person
 {
@@ -325,7 +380,7 @@ class Adress
 class Book
 {
     public int Id { get; set; }
-    public int IdBook { get; set; }
+    public int AuthorId { get; set; }
     //public Byte[] rowVersion { get; set; }
     public string BookName { get; set; }
 
@@ -334,6 +389,7 @@ class Book
 class Author
 {
     public int Id { get; set; }
+    public int BookId { get; set; }
     public string AuthorName { get; set; }
 
     public ICollection<Book> Books { get; set; }
@@ -365,6 +421,11 @@ class Technician : Employee
 {
     public string? Branch { get; set; }
 }
+class BookAuthor
+{ //Bu view için tanımlanan bir nesnedir. View çıktısında aşağıdaki kolonlar olduğundan dolayı propertileri bu şekilde verilmektedir.
+    public string  Name { get; set; }
+    public int Count { get; set; }
+} 
 //TablePerHierarchy sınıfları bitişi.
 class ExampleDbContext : DbContext
 {
@@ -373,6 +434,7 @@ class ExampleDbContext : DbContext
     public DbSet<Book> Books { get; set; }
     public DbSet<Author> Authors { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<BookAuthor> BookAuthors { get; set; } // View nesnesini DbSet olarak tanımlıyoruz fakat onModelCreating içerisinde bir tablo değil view olduğunu belirtiyoruz.
 
     //TableForHierarchy dbsetlerin tanımlanması.
     public DbSet<Personel>? Personels { get; set; }
@@ -520,6 +582,11 @@ class ExampleDbContext : DbContext
 
         #endregion
 
+        #endregion
+        #region View Tanımlanması
+        //modelBuilder.Entity<BookAuthor>()
+        //    .ToView("vm_BookAuthors") //ToView ile nesnenin Tablo değil View olduğunu belirtiyoruz.
+        //    .HasNoKey(); // bir key olmadığını belirtiyoruz.
         #endregion
 
     }
