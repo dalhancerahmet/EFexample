@@ -353,6 +353,9 @@ var query = context.Persons
  */
 #endregion
 #endregion
+#region Store Procedure
+
+#endregion
 
 class Person
 {
@@ -365,7 +368,7 @@ class Person
     public bool Active { get; set; }
 
 
-
+    
     public ICollection<Adress> Adresses { get; set; }
 }
 class Adress
@@ -421,11 +424,16 @@ class Technician : Employee
 {
     public string? Branch { get; set; }
 }
-class BookAuthor
-{ //Bu view için tanımlanan bir nesnedir. View çıktısında aşağıdaki kolonlar olduğundan dolayı propertileri bu şekilde verilmektedir.
-    public string  Name { get; set; }
-    public int Count { get; set; }
-} 
+class SelectPersonView
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+}
+//class BookAuthor
+//{ //Bu view için tanımlanan bir nesnedir. View çıktısında aşağıdaki kolonlar olduğundan dolayı propertileri bu şekilde verilmektedir.
+//    //public string  Name { get; set; }
+//    //public int Count { get; set; }
+//} 
 //TablePerHierarchy sınıfları bitişi.
 class ExampleDbContext : DbContext
 {
@@ -434,7 +442,7 @@ class ExampleDbContext : DbContext
     public DbSet<Book> Books { get; set; }
     public DbSet<Author> Authors { get; set; }
     public DbSet<Product> Products { get; set; }
-    public DbSet<BookAuthor> BookAuthors { get; set; } // View nesnesini DbSet olarak tanımlıyoruz fakat onModelCreating içerisinde bir tablo değil view olduğunu belirtiyoruz.
+    /*public DbSet<BookAuthor> BookAuthors { get; set; } */// View nesnesini DbSet olarak tanımlıyoruz fakat onModelCreating içerisinde bir tablo değil view olduğunu belirtiyoruz.
 
     //TableForHierarchy dbsetlerin tanımlanması.
     public DbSet<Personel>? Personels { get; set; }
@@ -447,7 +455,11 @@ class ExampleDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer("Server=AHMET\\SQLEXPRESS;Database=EfExampleDb;Trusted_Connection=True;");
+        //Aşağıdaki ayar ile Ef core içerisindeki loglama mekanizmasını kullanabiliyoruz. EnableDetailed ile detaylı loglama, enablesensitive ile hasssas verilerin de loglanmasını istiyoruz.
+       // optionsBuilder.LogTo(msg => Console.WriteLine(msg)).EnableDetailedErrors().EnableSensitiveDataLogging();
     }
+
+     
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -587,6 +599,12 @@ class ExampleDbContext : DbContext
         //modelBuilder.Entity<BookAuthor>()
         //    .ToView("vm_BookAuthors") //ToView ile nesnenin Tablo değil View olduğunu belirtiyoruz.
         //    .HasNoKey(); // bir key olmadığını belirtiyoruz.
+        #endregion
+        #region vm_BookAuthor
+        //vm_BookAuthor bir view olduğu için key'in olmadığını ve bir view olduğunu aşağıdaki gibi belirtiyoruz.
+        //modelBuilder.Entity<BookAuthor>()
+        //    .ToView("vm_BookAuthor")
+        //    .HasNoKey();
         #endregion
 
     }
