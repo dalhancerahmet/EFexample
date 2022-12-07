@@ -356,6 +356,13 @@ var query = context.Persons
 #region Store Procedure
 
 #endregion
+#region QueryFilter
+/*
+ Bu özellik ile fluent api üzerinde belirttiğimiz entity'e global/genel şart koyabiliyoruz.
+ Yani belirtilen entity nasıl sorgulanırsa sorgulansın en sonunda queryfilter ile koyduğumuz filtre uygulanarak veritabanına gönderilir.
+ Genellikle MultiTenancy uygulamalarda kullanılır.
+ */
+#endregion
 
 class Person
 {
@@ -606,7 +613,11 @@ class ExampleDbContext : DbContext
         //    .ToView("vm_BookAuthor")
         //    .HasNoKey();
         #endregion
-
+        #region QueryFilter
+        /*
+        modelBuilder.Entity<Person>()
+            .HasQueryFilter(p => p.Active); */ // Bu şekilde tüm sorgulara genel olarak filtre eklemiş olduk. Yani tüm yapılan sorgulamalara ek olarak Person'ın Active olması da bekleniyor.
+        #endregion
     }
     #region IEntityTypeConfiguration<T>
     // Bu interface ile implemente edilen sınıfta OnModelCreating işlemlerini yapabiliyoruz. Bu bizim configuration işlemlerini farklı bir sınıfta yaparak düzenli ve profesyonel çalışmamızı sağlıyor.
