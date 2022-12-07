@@ -356,12 +356,15 @@ var query = context.Persons
 #region Store Procedure
 
 #endregion
-#region QueryFilter
-/*
- Bu özellik ile fluent api üzerinde belirttiğimiz entity'e global/genel şart koyabiliyoruz.
- Yani belirtilen entity nasıl sorgulanırsa sorgulansın en sonunda queryfilter ile koyduğumuz filtre uygulanarak veritabanına gönderilir.
- Genellikle MultiTenancy uygulamalarda kullanılır.
- */
+#region GlabalQueryFilter
+
+//Bu özellik ile fluent api üzerinde belirttiğimiz entity'e global/genel şart koyabiliyoruz.
+// Yani belirtilen entity nasıl sorgulanırsa sorgulansın en sonunda queryfilter ile koyduğumuz filtre uygulanarak veritabanına gönderilir.
+// Genellikle MultiTenancy uygulamalarda kullanılır.;
+
+//await context.Persons.ToListAsync();
+
+// await context.Persons.IgnoreQueryFilters().ToListAsync(); // Bu şekilde global olarak filtrelemeyi anlık olarak ignore/gözardı etmek istiyorsak IgnoreQueryFilters'ı kullanabiliriz.
 #endregion
 
 class Person
@@ -375,7 +378,7 @@ class Person
     public bool Active { get; set; }
 
 
-    
+
     public ICollection<Adress> Adresses { get; set; }
 }
 class Adress
@@ -463,10 +466,10 @@ class ExampleDbContext : DbContext
     {
         optionsBuilder.UseSqlServer("Server=AHMET\\SQLEXPRESS;Database=EfExampleDb;Trusted_Connection=True;");
         //Aşağıdaki ayar ile Ef core içerisindeki loglama mekanizmasını kullanabiliyoruz. EnableDetailed ile detaylı loglama, enablesensitive ile hasssas verilerin de loglanmasını istiyoruz.
-       // optionsBuilder.LogTo(msg => Console.WriteLine(msg)).EnableDetailedErrors().EnableSensitiveDataLogging();
+        // optionsBuilder.LogTo(msg => Console.WriteLine(msg)).EnableDetailedErrors().EnableSensitiveDataLogging();
     }
 
-     
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -614,9 +617,9 @@ class ExampleDbContext : DbContext
         //    .HasNoKey();
         #endregion
         #region QueryFilter
-        /*
-        modelBuilder.Entity<Person>()
-            .HasQueryFilter(p => p.Active); */ // Bu şekilde tüm sorgulara genel olarak filtre eklemiş olduk. Yani tüm yapılan sorgulamalara ek olarak Person'ın Active olması da bekleniyor.
+
+        //modelBuilder.Entity<Person>()
+        //.HasQueryFilter(p => p.Active); Bu şekilde tüm sorgulara genel olarak filtre eklemiş olduk. Yani tüm yapılan sorgulamalara ek olarak Person'ın Active olması da bekleniyor.
         #endregion
     }
     #region IEntityTypeConfiguration<T>
