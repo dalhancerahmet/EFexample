@@ -366,6 +366,41 @@ var query = context.Persons
 
 // await context.Persons.IgnoreQueryFilters().ToListAsync(); // Bu şekilde global olarak filtrelemeyi anlık olarak ignore/gözardı etmek istiyorsak IgnoreQueryFilters'ı kullanabiliriz.
 #endregion
+#region Owned Entity Type
+// Nedir?
+// Bazen Entity'lerimizi tıpkı kalıtım alır gibi parçalamak isteriz. Bunu yapabilmemizi sağlayan mekanizmadır.
+// Örneğin Member/Üye entitimiz için belli özellikler var. Bunları gruplayarak farklı entity türlerinde saklayabiliyoruz. Misal FirstName,LastName,MiddleName'i bir grup, Adress ve Location 'ı farklı bir grup olarak tutabiliyoruz. Bunu yaptıktan sonra EF'ye bunun bir Owned Entity olduğunu belirtmek için fluen Api'da onModelCreating içerisinde OwnsOne özelliğini kullanmamız gerekmektedir.
+//Aşağıdaki yapı incelenebilir.
+class Member
+{
+    public int Id { get; set; }
+    //public string FirsName { get; set; }
+    //public string LastName { get; set; }
+    //public string MiddleName { get; set; }
+    public MemberNameGroup MemberNameGroup { get; set; }
+    //public string Adress { get; set; }
+    //public string Location { get; set; }
+    public MemberAdressGroup MemberAdressGroup { get; set; }
+    public bool Active { get; set; }
+}
+
+class MemberNameGroup
+{
+    public string FirsName { get; set; }
+    public string LastName { get; set; }
+    public string MiddleName { get; set; }
+}
+class MemberAdressGroup
+{
+    public string Adress { get; set; }
+    public string Location { get; set; }
+}
+#endregion
+#region Temprol Tables
+// Tablolara history/tarih/log atmayı sağlayan ef core 6.0 ile gelen özelliktir. Configuration kısmı onModelCreating kısmında yapılır. Bir tabloya Temprol özelliği kazandırmak için modelbuilder.Entity<TabloAdı>().ToTable("TabloyaVerdiğimizİsim", builder=>builder.IsTemporal) komutunu kullanıyoruz.
+
+// Önemli not! Temprol Table veri kaydederken history/log tutmaz, sadece veri güncelleme esnasında kayıt tutar.
+#endregion
 
 class Person
 {
@@ -620,6 +655,15 @@ class ExampleDbContext : DbContext
 
         //modelBuilder.Entity<Person>()
         //.HasQueryFilter(p => p.Active); Bu şekilde tüm sorgulara genel olarak filtre eklemiş olduk. Yani tüm yapılan sorgulamalara ek olarak Person'ın Active olması da bekleniyor.
+        #endregion
+        #region Owned Entity Type
+
+        modelBuilder.Entity<Member>().OwnsOne(m => m.MemberAdressGroup);
+        modelBuilder.Entity<Member>().OwnsOne(m => m.MemberNameGroup);
+
+        #endregion
+        #region Temprol Table Configuration
+        modelBuilder.Entity<Person>().ToTable("Persons", builder => builder.IsTemporal());
         #endregion
     }
     #region IEntityTypeConfiguration<T>
