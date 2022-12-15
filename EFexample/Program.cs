@@ -1,8 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Globalization;
 using System.Reflection;
 
 ExampleDbContext context = new();
+
 #region one to one add
 
 //Person person = new()
@@ -371,35 +374,59 @@ var query = context.Persons
 // Bazen Entity'lerimizi tıpkı kalıtım alır gibi parçalamak isteriz. Bunu yapabilmemizi sağlayan mekanizmadır.
 // Örneğin Member/Üye entitimiz için belli özellikler var. Bunları gruplayarak farklı entity türlerinde saklayabiliyoruz. Misal FirstName,LastName,MiddleName'i bir grup, Adress ve Location 'ı farklı bir grup olarak tutabiliyoruz. Bunu yaptıktan sonra EF'ye bunun bir Owned Entity olduğunu belirtmek için fluen Api'da onModelCreating içerisinde OwnsOne özelliğini kullanmamız gerekmektedir.
 //Aşağıdaki yapı incelenebilir.
-class Member
-{
-    public int Id { get; set; }
-    //public string FirsName { get; set; }
-    //public string LastName { get; set; }
-    //public string MiddleName { get; set; }
-    public MemberNameGroup MemberNameGroup { get; set; }
-    //public string Adress { get; set; }
-    //public string Location { get; set; }
-    public MemberAdressGroup MemberAdressGroup { get; set; }
-    public bool Active { get; set; }
-}
+//class Member
+//{
+//    public int Id { get; set; }
+//    //public string FirsName { get; set; }
+//    //public string LastName { get; set; }
+//    //public string MiddleName { get; set; }
+//    public MemberNameGroup MemberNameGroup { get; set; }
+//    //public string Adress { get; set; }
+//    //public string Location { get; set; }
+//    public MemberAdressGroup MemberAdressGroup { get; set; }
+//    public bool Active { get; set; }
+//}
 
-class MemberNameGroup
-{
-    public string FirsName { get; set; }
-    public string LastName { get; set; }
-    public string MiddleName { get; set; }
-}
-class MemberAdressGroup
-{
-    public string Adress { get; set; }
-    public string Location { get; set; }
-}
+//class MemberNameGroup
+//{
+//    public string FirsName { get; set; }
+//    public string LastName { get; set; }
+//    public string MiddleName { get; set; }
+//}
+//class MemberAdressGroup
+//{
+//    public string Adress { get; set; }
+//    public string Location { get; set; }
+//}
 #endregion
 #region Temprol Tables
 // Tablolara history/tarih/log atmayı sağlayan ef core 6.0 ile gelen özelliktir. Configuration kısmı onModelCreating kısmında yapılır. Bir tabloya Temprol özelliği kazandırmak için modelbuilder.Entity<TabloAdı>().ToTable("TabloyaVerdiğimizİsim", builder=>builder.IsTemporal) komutunu kullanıyoruz.
 
 // Önemli not! Temprol Table veri kaydederken history/log tutmaz, sadece veri güncelleme esnasında kayıt tutar.
+#endregion
+#region Connection Resiliency 
+// Veritabanı kopukluklarında nasıl bir yol izlememizi belirleyen stratejidir.
+#region EnableRetryOnFailure
+// EnableRetryOnFailure fonksiyonu ile veritabanı bağlantı kopukluklarında default ayarlarında bağlantıyı tekrar kurmaya çalışır. Configuration işlemleri fluent api tarafında onConfiguring metodunda yapılır.
+#endregion
+#region CustomExecution Strategy
+// Custom bir class oluşturup bunu ExecutionStrategy sınıfından inherent ediyoruz ve overload'larını oluşturuyoruz. Daha sonra fluent api da ExecutionStrategy fonksiyonunu kullanarak oluşturduğumuz sınıfı buraya referansını veriyoruz.
+#endregion
+#region Bir işlem sırasında bağlantı kopukluğu olursa işlemin devam etme durumu hakkında
+
+// bağlantı kesilmesi durumunda yarıda kalan işlemin en başından yapılması gerekmektedir. Execute fonksiyonu ile yapılan işlem commit edilene kadar devam edecek, eğer yarıda kalırsa işlemi başa alacak ve commit olana kadar tekrarlayacaktır. Örnek:
+
+var strategy = context.Database.CreateExecutionStrategy();
+
+await strategy.ExecuteAsync(async () =>
+{
+    using var transcation = context.Database.BeginTransaction();
+    await context.Personels.AddAsync(new() { Id = 1, Name = "Ahmet", Surname = "Dalhançer" });
+    context.SaveChanges();
+
+    transcation.Commit();
+});
+#endregion
 #endregion
 
 class Person
@@ -499,9 +526,26 @@ class ExampleDbContext : DbContext
     #region ConConfiguringSqlServerConnection
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer("Server=AHMET\\SQLEXPRESS;Database=EfExampleDb;Trusted_Connection=True;");
+        #region EnableRetryOnFailure Nedir
+        //EnableRetryOnFailure ile veri tabanı bağlantı kopmalarında defaul şekilde bağlantıyı belli aralıkla ve belli sayıda tekrar kurmaya çalışır. Bu fonksiyon defaul değerlerde işlem yapar.
+
+        //maxRetryCount : Deneme sayısı,maxRetryDelay: bekleme süresi, errorNumbersToAdd: port, LogTo: bağlantı kopuşlarında loglama yapılır.
+        #endregion
+        #region Default Execution Stategy Options
+
+        //optionsBuilder.UseSqlServer("Server=AHMET\\SQLEXPRESS;Database=EfExampleDb;Trusted_Connection=True;",builder => builder.EnableRetryOnFailure(
+        //    maxRetryCount: 7,
+        //    maxRetryDelay: TimeSpan.FromSeconds(7),
+        //    errorNumbersToAdd: new[] { 4060 }))
+        //.LogTo(logger: eventData => Console.WriteLine("Bağlantı tekrar kuruluyor..."), filter: null);
+
         //Aşağıdaki ayar ile Ef core içerisindeki loglama mekanizmasını kullanabiliyoruz. EnableDetailed ile detaylı loglama, enablesensitive ile hasssas verilerin de loglanmasını istiyoruz.
         // optionsBuilder.LogTo(msg => Console.WriteLine(msg)).EnableDetailedErrors().EnableSensitiveDataLogging();
+        #endregion
+        #region Custom Execution Stategy Options
+        optionsBuilder.UseSqlServer("Server=AHMET\\SQLEXPRESS;Database=EfExampleDb;Trusted_Connection=True;",
+            builder=>builder.ExecutionStrategy(dependencies=>new CustomExecutionStrategy(dependencies, 15,TimeSpan.FromSeconds(15))));
+        #endregion
     }
 
 
@@ -658,12 +702,12 @@ class ExampleDbContext : DbContext
         #endregion
         #region Owned Entity Type
 
-        modelBuilder.Entity<Member>().OwnsOne(m => m.MemberAdressGroup);
-        modelBuilder.Entity<Member>().OwnsOne(m => m.MemberNameGroup);
+        //modelBuilder.Entity<Member>().OwnsOne(m => m.MemberAdressGroup);
+        //modelBuilder.Entity<Member>().OwnsOne(m => m.MemberNameGroup);
 
         #endregion
         #region Temprol Table Configuration
-        modelBuilder.Entity<Person>().ToTable("Persons", builder => builder.IsTemporal());
+        //modelBuilder.Entity<Person>().ToTable("Persons", builder => builder.IsTemporal());
         #endregion
     }
     #region IEntityTypeConfiguration<T>
@@ -684,4 +728,23 @@ class ExampleDbContext : DbContext
     //    }
     //}
     #endregion
+    #region CustomExecution Class
+    class CustomExecutionStrategy : ExecutionStrategy // Custom oluşturduğumuz bağlantı kopukluğunda uygulanacak stratejimiz.
+    {
+        public CustomExecutionStrategy(DbContext context, int maxRetryCount, TimeSpan maxRetryDelay) : base(context, maxRetryCount, maxRetryDelay)
+        {
+        }
+
+        public CustomExecutionStrategy(ExecutionStrategyDependencies dependencies, int maxRetryCount, TimeSpan maxRetryDelay) : base(dependencies, maxRetryCount, maxRetryDelay)
+        {
+        }
+
+        protected override bool ShouldRetryOn(Exception exception)
+        {
+            Console.WriteLine("Bağlantı kuruluyor...");
+            return true;
+        }
+    }
+    #endregion
+
 }
