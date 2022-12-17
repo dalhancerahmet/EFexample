@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Reflection;
 
@@ -416,23 +417,34 @@ var query = context.Persons
 
 // bağlantı kesilmesi durumunda yarıda kalan işlemin en başından yapılması gerekmektedir. Execute fonksiyonu ile yapılan işlem commit edilene kadar devam edecek, eğer yarıda kalırsa işlemi başa alacak ve commit olana kadar tekrarlayacaktır. Örnek:
 
-var strategy = context.Database.CreateExecutionStrategy();
+//var strategy = context.Database.CreateExecutionStrategy();
 
-await strategy.ExecuteAsync(async () =>
-{
-    using var transcation = context.Database.BeginTransaction();
-    await context.Personels.AddAsync(new() { Id = 1, Name = "Ahmet", Surname = "Dalhançer" });
-    context.SaveChanges();
-
-    transcation.Commit();
-});
+//await strategy.ExecuteAsync(async () =>
+//{
+//    using var transcation = context.Database.BeginTransaction();
+//    await context.Personels.AddAsync(new() { Id = 1, Name = "Ahmet", Surname = "Dalhançer" });
+//    context.SaveChanges();
+//    transcation.Commit();
+//});
 #endregion
+#endregion
+#region Data Concurrency
+// Concurrency => Eşzamanlı. Bazı durumlarda veri tutarsızlığı yaşıyoruz ve bu tutarsızlığı kontrol altına almak için concurrency yapısını kullanabiliriz. Örnek verecek olursak, bir veriyi güncellemek istediğimiz esnada farklı bir yerden aynı veri daha öncesinde güncellenmiş ise bu tutarsızlık demektir. Bu aşamada sistemin bizi uyarması gerekmektedir. Çok önemli bir konudur. Bunun iki farklı bir yaklaşımı vardır.
+//1 - Pessimistic Lock (Kötümser  Kilitleme) : Bu yöntemi sadece fromSql cümlecikleri ile kullanabiliyoruz. Bu yöntem ile işlem yaparken commit olana kadar veritabanını kitler ve herhangi bir işlem yapmaya engel olur. Örnek kullanım
+// context.Persons.FromSql($"Select * from Persons with XClock"); Xclock ile kilitliyoruz. Bu yöntem tercih edilen bir yöntem değildir.
+//2 - Optimistic Lock(İyimser Kilitleme) : Bu yöntem ile kilitlediğimizde veritabanında farklı işlemler yapılabilir fakat bize veri tutarsızlığı olduğu zaman hata fırlatır. Örnek kullanım : Fluent Api tarafında ve ConcurrencyCheck attribute'u ile yapılabilir. Bakınız fluentApi.
+
+// Belirlediğimiz kolona concurrency yapılanmasını uygulayabiliriz veya bir diğer yöntem ise rowVersion adında bir properti tanımlarız ve bu propertinin versiyon tutmasını, uyuşmazlık durumunda hata fırlatmasını bekleriz. Tanımlanan propertinin concurreny yapılanmasını uygulayabilmek için [Timestamp] attribute'u ile işaretlememiz gerekiyor.
+
+//public byte[] rowVersion { get; set; }
+
 #endregion
 
 class Person
 {
     public int Id { get; set; }
     public int Id2 { get; set; }
+    //[ConcurrencyCheck()] Attribute'u ile concurreny yapılanmasını uyguluyoruz.
     public string FullName;
     public string FirstName { get => FullName; set => FullName = value; }
     public string LastName { get; set; }
@@ -708,6 +720,11 @@ class ExampleDbContext : DbContext
         #endregion
         #region Temprol Table Configuration
         //modelBuilder.Entity<Person>().ToTable("Persons", builder => builder.IsTemporal());
+        #endregion
+        #region Data Concurrency
+        //modelBuilder.Entity<Person>()
+        //    .Property(p => p.CreatedDate)
+        //    .IsConcurrencyToken(); // is ConcurencyToken ile belirlediğimiz entity için concurrency yapılanmasını uygulayabiliyoruz.
         #endregion
     }
     #region IEntityTypeConfiguration<T>
