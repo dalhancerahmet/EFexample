@@ -439,6 +439,9 @@ var query = context.Persons
 //public byte[] rowVersion { get; set; }
 
 #endregion
+#region Value Conversions
+
+#endregion
 
 class Person
 {
