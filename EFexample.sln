@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scalar-And-Inline-Functions
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Value-Conversions", "Value-Conversions", "{33BE7C51-B2B2-48CC-B389-6AAEFAF33AA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Value-Conversions", "Value-Conversions\Value-Conversions.csproj", "{B3C5F470-CF4E-4DEC-8F42-787C08B18E31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Value-Conversions", "Value-Conversions\Value-Conversions.csproj", "{B3C5F470-CF4E-4DEC-8F42-787C08B18E31}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

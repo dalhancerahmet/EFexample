@@ -187,7 +187,7 @@ await context.SaveChangesAsync();
 #endregion
 #region Include
 //Üretilen sorguda diğer ilişkisel tabloları dahil etmek istiyorsak include fonksiyonunu kullanırız.
-var result = await context.Persons.Include(p => p.Adresses).ToListAsync(); // Burada Persons tablosunun ilişkili olduğu Adresses tablosunu dahil etmiş olduk.
+/*var result = await context.Persons.Include(p => p.Adresses).ToListAsync(); */// Burada Persons tablosunun ilişkili olduğu Adresses tablosunu dahil etmiş olduk.
 /*
 SELECT[p].[Id], [p].[Active], [p].[CreatedDate], [p].[FirstName], [p].[Id2], [p].[LastName], [a].[Id], [a].[PersonAdress], [a].[PersonId]
 FROM[Persons] AS[p]
@@ -439,8 +439,34 @@ var query = context.Persons
 //public byte[] rowVersion { get; set; }
 
 #endregion
-#region Value Conversions
+#region Transaction
+// Transaction ile yapılan işlem son adıma kadar başarılı veya başarısız bir şekilde ilerlemesi durumuna göre aksiyon almaya yarar. Örneğin bir hesaptan başka bir hesaba para göndermek istedik. Bizim hesaptan para çıkışı oldu fakat karşı tarafın hesabına para yansımadı. Bu durumda tüm yapılan bu işlemlerin geriye alınması gerekmektedir. Bu durumu transaction ile kontrol altına alırız. Örneğin aşağıda bir veri eklemek istiyoruz.
+//var transaction = await context.Database.BeginTransactionAsync();
+//Product product = new() { Name="Ürün Adı", Price=12, Salary=34, ComputedValue=3 };
+//context.Products.Add(product);
+//await context.SaveChangesAsync();
+//transaction.Commit(); // Yukarıda BeginTransaction ile transaction açtığımız için commit etmediğimiz sürece veritabanına veriyi göndermeyecektir.
 
+#region RollbackToSavePoint
+// Bu fonksiyon ile yaptığımız işlemlerin arasında işaretlemeler koyup gerektiğinde o işaretlerin olduğu yere kadar işlemeleri geri alabilyoruz. Yani rollback yapabiliyoruz. Örneği inceleyelim.
+
+//var transaction =await context.Database.BeginTransactionAsync();
+//Product product1 = new() { Name = "Ürün 1", ComputedValue = 1, Price = 1, Salary = 1 };
+//Product product2 = new() { Name = "Ürün 2", ComputedValue = 2, Price = 2, Salary = 2 };
+
+//await context.Products.AddAsync(product1);
+//await context.SaveChangesAsync();
+//await transaction.CreateSavepointAsync("station1"); // Bir durak oluşturuyoruz. Eğer gerek duyulursa bu durağa kadar işlemler geri alınabilecektir.
+
+//await context.Products.AddAsync(product2);
+//await context.SaveChangesAsync();
+
+
+//await transaction.RollbackToSavepointAsync("station1"); // Bu fonksiyon ile araya koyduğumuz ve ismini station1 verdiğimiz durağa kadar işlemi geri alıyoruz.
+//transaction.Commit();
+
+
+#endregion
 #endregion
 
 class Person
@@ -454,14 +480,11 @@ class Person
     public DateTime CreatedDate { get; set; }
     public bool Active { get; set; }
 
-
-
     public ICollection<Adress> Adresses { get; set; }
 }
 class Adress
 {
     public int Id { get; set; }
-
     public string PersonAdress { get; set; }
     public int PersonId { get; set; }
 
@@ -541,6 +564,7 @@ class ExampleDbContext : DbContext
     #region ConConfiguringSqlServerConnection
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        optionsBuilder.UseSqlServer("Server=AHMET\\SQLEXPRESS;Database=EfExampleDb;Encrypt=False;Trusted_Connection=True;");
         #region EnableRetryOnFailure Nedir
         //EnableRetryOnFailure ile veri tabanı bağlantı kopmalarında defaul şekilde bağlantıyı belli aralıkla ve belli sayıda tekrar kurmaya çalışır. Bu fonksiyon defaul değerlerde işlem yapar.
 
@@ -558,8 +582,8 @@ class ExampleDbContext : DbContext
         // optionsBuilder.LogTo(msg => Console.WriteLine(msg)).EnableDetailedErrors().EnableSensitiveDataLogging();
         #endregion
         #region Custom Execution Stategy Options
-        optionsBuilder.UseSqlServer("Server=AHMET\\SQLEXPRESS;Database=EfExampleDb;Trusted_Connection=True;",
-            builder=>builder.ExecutionStrategy(dependencies=>new CustomExecutionStrategy(dependencies, 15,TimeSpan.FromSeconds(15))));
+        //optionsBuilder.UseSqlServer("Server=AHMET\\SQLEXPRESS;Database=EfExampleDb;Trusted_Connection=True;",
+        //    builder=>builder.ExecutionStrategy(dependencies=>new CustomExecutionStrategy(dependencies, 15,TimeSpan.FromSeconds(15))));
         #endregion
     }
 
@@ -749,22 +773,22 @@ class ExampleDbContext : DbContext
     //}
     #endregion
     #region CustomExecution Class
-    class CustomExecutionStrategy : ExecutionStrategy // Custom oluşturduğumuz bağlantı kopukluğunda uygulanacak stratejimiz.
-    {
-        public CustomExecutionStrategy(DbContext context, int maxRetryCount, TimeSpan maxRetryDelay) : base(context, maxRetryCount, maxRetryDelay)
-        {
-        }
+    //class CustomExecutionStrategy : ExecutionStrategy // Custom oluşturduğumuz bağlantı kopukluğunda uygulanacak stratejimiz.
+    //{
+    //    public CustomExecutionStrategy(DbContext context, int maxRetryCount, TimeSpan maxRetryDelay) : base(context, maxRetryCount, maxRetryDelay)
+    //    {
+    //    }
 
-        public CustomExecutionStrategy(ExecutionStrategyDependencies dependencies, int maxRetryCount, TimeSpan maxRetryDelay) : base(dependencies, maxRetryCount, maxRetryDelay)
-        {
-        }
+    //    public CustomExecutionStrategy(ExecutionStrategyDependencies dependencies, int maxRetryCount, TimeSpan maxRetryDelay) : base(dependencies, maxRetryCount, maxRetryDelay)
+    //    {
+    //    }
 
-        protected override bool ShouldRetryOn(Exception exception)
-        {
-            Console.WriteLine("Bağlantı kuruluyor...");
-            return true;
-        }
-    }
+    //    protected override bool ShouldRetryOn(Exception exception)
+    //    {
+    //        Console.WriteLine("Bağlantı kuruluyor...");
+    //        return true;
+    //    }
+    //}
     #endregion
 
 }
