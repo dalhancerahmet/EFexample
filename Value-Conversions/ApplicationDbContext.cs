@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Value_Conversions.Conversions;
 
 namespace Value_Conversions
 {
@@ -39,7 +41,30 @@ namespace Value_Conversions
             //    .Property(p=>p.Gender)
             //    .HasConversion(converter);
             #endregion
-
+            #region Custom Value Converter
+            // Özelliştirilmiş sınıflar oluşturup bu sınıflar üzerinde converter işlemlerini yaptırıp aşağıdaki gibi fluent api'a bildirebiliriz. Özelliştirilmiş sınıfa bakmak için bakınız Conversions klasörü.
+            //modelBuilder.Entity<Person>()
+            //    .Property(p => p.Gender)
+            //    .HasConversion<GenderConverter>();
+            #endregion
+            #region BoolToZeroOneConverter - Bool değeri integer olarak veritabanında tutma
+            //modelBuilder.Entity<Person>()
+            //    .Property(p => p.Married)
+            //    .HasConversion<int>(); // bool olan Married propertinin integer olarak veritabanında tutulmasını sağlar.
+            #endregion
+            #region BoolToStringOneConverter - Bool değeri string olarak veritabanında tutma
+            //BoolToStringConverter converter = new("Bekar", "Evli"); // Bool durumun false gelmesi durumunda veritabanına Bekar, değilse Evli olarak string değerde kaydetmesini sağlar.
+            //modelBuilder.Entity<Person>()
+            //    .Property(p=>p.Married)
+            //    .HasConversion(converter);
+            #endregion
+            #region İlkel Koleksiyonların Veritabanına kaydederkenki Serilizasyon çalışması
+            //modelBuilder.Entity<Person>()
+            //    .Property(p => p.Titles)
+            //    .HasConversion(g => JsonSerializer.Serialize(g, (JsonSerializerOptions)null),
+            //    g=>JsonSerializer.Deserialize<List<string>>(g, (JsonSerializerOptions)null));
+            // Titles propertisi bir List<string> olduğundan veritabanına kaydederken hata almamak için Dönüşüm işlemi uyguluyoruz. Bu dönüşümde Seriliaze ederek gönderiyoruz. Select sorguları için de deserilaze ediyoruz.
+            #endregion
             #endregion
             modelBuilder.Entity<Person>()
                 .HasData(new[] { new Person() { Id = 1, Name = "Ahmet", Gender = "M", Gender2 = Gender.Male },
