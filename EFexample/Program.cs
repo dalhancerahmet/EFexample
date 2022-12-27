@@ -469,7 +469,7 @@ var query = context.Persons
 #endregion
 #endregion
 
-class Person
+public class Person
 {
     public int Id { get; set; }
     public int Id2 { get; set; }
@@ -545,7 +545,7 @@ class SelectPersonView
 //    //public int Count { get; set; }
 //} 
 //TablePerHierarchy sınıfları bitişi.
-class ExampleDbContext : DbContext
+public class ExampleDbContext : DbContext
 {
     public DbSet<Person> Persons { get; set; }
     public DbSet<Adress> Adresses { get; set; }
