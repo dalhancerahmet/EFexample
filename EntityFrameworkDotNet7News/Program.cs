@@ -2,7 +2,7 @@
 
 internal class Program
 {
-    private static async void Main(string[] args)
+    private static  void Main(string[] args)
     {
         ExampleDbContext context = new();
         #region ExecuteUpdate
@@ -13,7 +13,7 @@ internal class Program
         #region ExecuteDelete
         //.Net 7 ile gelen bir özelliktir. Toplu silme işlemlerini yapmamızı sağlar. Aşağıdaki örnekte görüldüğü gibi.
 
-        await context.Persons.Where(p => p.FirstName.StartsWith("B")).ExecuteDeleteAsync();
+         context.Persons.Where(p => p.FirstName.StartsWith("B")).ExecuteDeleteAsync();
 
         //executeupdate ve executedelete fonksiyonları ile toplu işlem yaparken savechanges fonksiyonunu çağırmamıza gerek kalmadan direkt olarak veritabanına komutu göndermektedir.
         #endregion

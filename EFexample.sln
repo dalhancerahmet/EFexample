@@ -18,7 +18,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Value-Conversions", "Value-
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InMemory", "InMemory\InMemory.csproj", "{2F684B73-AEF5-44D9-9EFA-9DA8190F5071}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkDotNet7News", "EntityFrameworkDotNet7News\EntityFrameworkDotNet7News.csproj", "{6D402E73-09F8-49E8-ADF4-C2F504BFA78A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkDotNet7News", "EntityFrameworkDotNet7News\EntityFrameworkDotNet7News.csproj", "{6D402E73-09F8-49E8-ADF4-C2F504BFA78A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EF_Core_7_New_Entity_Splitting", "EF_Core_7_New_Entity_Splitting\EF_Core_7_New_Entity_Splitting.csproj", "{3C204BBE-9AAF-45C4-A0FB-4B31DE96CF9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +48,10 @@ Global
 		{6D402E73-09F8-49E8-ADF4-C2F504BFA78A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D402E73-09F8-49E8-ADF4-C2F504BFA78A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D402E73-09F8-49E8-ADF4-C2F504BFA78A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C204BBE-9AAF-45C4-A0FB-4B31DE96CF9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C204BBE-9AAF-45C4-A0FB-4B31DE96CF9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C204BBE-9AAF-45C4-A0FB-4B31DE96CF9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C204BBE-9AAF-45C4-A0FB-4B31DE96CF9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

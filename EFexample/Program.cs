@@ -480,7 +480,7 @@ public class Person
     public DateTime CreatedDate { get; set; }
     public bool Active { get; set; }
 
-    public ICollection<Adress> Adresses { get; set; }
+    //public ICollection<Adress> Adresses { get; set; }
 }
 class Adress
 {
@@ -548,17 +548,17 @@ class SelectPersonView
 public class ExampleDbContext : DbContext
 {
     public DbSet<Person> Persons { get; set; }
-    public DbSet<Adress> Adresses { get; set; }
-    public DbSet<Book> Books { get; set; }
-    public DbSet<Author> Authors { get; set; }
-    public DbSet<Product> Products { get; set; }
+    //public DbSet<Adress> Adresses { get; set; }
+    //public DbSet<Book> Books { get; set; }
+    //public DbSet<Author> Authors { get; set; }
+    //public DbSet<Product> Products { get; set; }
     /*public DbSet<BookAuthor> BookAuthors { get; set; } */// View nesnesini DbSet olarak tanımlıyoruz fakat onModelCreating içerisinde bir tablo değil view olduğunu belirtiyoruz.
 
     //TableForHierarchy dbsetlerin tanımlanması.
-    public DbSet<Personel>? Personels { get; set; }
-    public DbSet<Employee>? Employees { get; set; }
-    public DbSet<Customer>? Customers { get; set; }
-    public DbSet<Technician>? Technicians { get; set; }
+    //public DbSet<Personel>? Personels { get; set; }
+    //public DbSet<Employee>? Employees { get; set; }
+    //public DbSet<Customer>? Customers { get; set; }
+    //public DbSet<Technician>? Technicians { get; set; }
     //TableForHierarchy dbsetlerin tanımlanması bitiş.
 
     #region ConConfiguringSqlServerConnection
